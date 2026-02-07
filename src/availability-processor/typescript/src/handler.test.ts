@@ -212,7 +212,7 @@ describe("EventProcessor", () => {
             patientId: "patient-1",
             caregiverId: testCaregiverId,
             startTime: absenceStartTime.addHours(1),
-            endTime: absenceEndTime.addDays(1),
+            endTime: absenceStartTime.addHours(2),
           },
         ];
 
