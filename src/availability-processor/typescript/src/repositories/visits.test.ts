@@ -369,7 +369,31 @@ describe("VisitRepository", () => {
     it.todo("unassigns if the tenantId matches", async () => {
     })
 
-    it.todo("doesn't unassign if the tenantId doesn't match", async () => {
+    it("doesn't unassign if the tenantId doesn't match", async () => {
+      const now = new Date();
+      const visits = [
+        createTestVisit(
+          "1",
+          "tenant1",
+          "patient1",
+          "caregiver1",
+          now,
+          now.addHours(1)
+        ),
+      ];
+
+      const repo = new VisitRepository(visits);
+
+      await repo.unassign("1", "caregiver1", "tenant2");
+
+      // Verify visit has not been unassigned
+      const result = await repo.getCalendar(
+        "caregiver1",
+        now.subtractHours(1),
+        now.addHours(3)
+      );
+      expect(result).toHaveLength(1);
+      expect(result[0].caregiverId).toBe("caregiver1");
     })
   });
 });
