@@ -44,15 +44,15 @@ export class VisitRepository {
 
   async unassign(visitId: string, caregiverId: string, tenantId?: string): Promise<void> {
     for (const visit of this.visits) {
-      if (visit.id === visitId && visit.caregiverId === caregiverId) {
-        // If tenantId is provided, check if it matches the visit's tenantId
-        if (tenantId && visit.tenantId !== tenantId) {
-          continue;
-        }
+      if (visit.id === visitId && visit.caregiverId === caregiverId && this.tenantMatches(visit, tenantId)) {
         // Set caregiver ID to empty string to indicate unassignment
         visit.caregiverId = "";
         break;
       }
     }
+  }
+
+  private tenantMatches(visit: Visit, tenantId?: string): boolean {
+    return !tenantId || visit.tenantId === tenantId;
   }
 }
