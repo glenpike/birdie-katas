@@ -1,6 +1,9 @@
 import { EventProcessor } from "./handler";
-import type { CaregiverPermanentUnavailabilityEvent } from "./events";
+import type { CaregiverAbsenceBookedEvent, CaregiverPermanentUnavailabilityEvent } from "./events";
 import { VisitRepository, type Visit } from "./repositories/visits";
+
+// Import date extensions to allow for use of methods like addHours, subtractMinutes, etc.
+import "./date-extensions";
 
 const testTenantId = "tenant-1";
 const testCaregiverId = "caregiver-1";
@@ -112,12 +115,54 @@ describe("EventProcessor", () => {
     );
 
     describe("temporary absence", () => {
-      it.todo("when absence is before visit");
-      it.todo("when absence is after visit");
-      it.todo("when absence includes visit");
-      it.todo("when absence includes more than one visit");
-      it.todo("when absence starts during visit but ends after");
-      it.todo("when absence starts before visit but ends during");
+      it("when absence is before visit", async () => {
+        const absenceStartTime = new Date("2025-11-06T10:00:00.000Z");
+        const absenceEndTime = absenceStartTime.addHours(1);
+        const visits: Visit[] = [
+          {
+            id: "visit-1",
+            tenantId: testTenantId,
+            patientId: "patient-1",
+            caregiverId: testCaregiverId,
+            startTime: absenceStartTime.addDays(1),
+            endTime: absenceEndTime.addDays(1),
+          },
+        ];
+
+        // Create repository and processor
+        const repo = new VisitRepository(visits);
+        const eventProcessor = new EventProcessor(repo);
+
+        // Create a permanent unavailability event starting on Nov 7th
+        const absenceEvent: CaregiverAbsenceBookedEvent = {
+          id: "unavailability-1",
+          tenantId: testTenantId,
+          caregiverId: testCaregiverId,
+          startTime: absenceStartTime,
+          endTime: absenceEndTime,
+        };
+
+        // Process the absence event
+        await eventProcessor.handleEvent(absenceEvent);
+
+        // Check the results - get all visits by not specifying caregiver ID
+        const allVisits = await repo.getCalendar(
+          null,
+          new Date("2025-11-01T00:00:00.000Z"),
+          new Date("2026-11-01T00:00:00.000Z")
+        );
+
+        // Visit should still exist
+        expect(allVisits).toHaveLength(1);
+        // Visit should not be unassigned
+        expect(allVisits[0].caregiverId).toBe(testCaregiverId);
+      });
+
+      it.todo("when absence is after visit", async () => { });
+      it.todo("when absence includes visit", async () => { });
+      it.todo("when absence includes more than one visit", async () => { });
+      it.todo("when absence starts during visit but ends after", async () => { });
+      it.todo("when absence starts before visit but ends during", async () => { });
     });
   });
 });
