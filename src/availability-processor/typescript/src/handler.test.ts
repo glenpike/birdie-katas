@@ -110,5 +110,11 @@ describe("EventProcessor", () => {
         expect(allVisits[0].caregiverId).toBe("");
       }
     );
+
+    describe("temporary absence", () => {
+      it.todo("when absence is before visit");
+      it.todo("when absence is after visit");
+      it.todo("when absence is during visit");
+    });
   });
 });
