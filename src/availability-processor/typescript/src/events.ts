@@ -1,27 +1,28 @@
 import type { Visit } from "./repositories/visits";
 
-export interface CaregiverPermanentUnavailabilityEvent {
+export interface CaregiverEvent {
   /** Unique identifier for the permanent unavailability event */
   id: string;
   /** Unique identifier for the tenant (care agency) */
   tenantId: string;
   /** Unique identifier for the caregiver */
   caregiverId: string;
+}
+
+export interface CaregiverPermanentUnavailabilityEvent extends CaregiverEvent {
   /** Time when the permanent unavailability starts */
   effectiveFrom: Date;
 }
 
-export interface CaregiverAbsenceBookedEvent {
-  /** Unique identifier for the absence event */
-  id: string;
-  /** Unique identifier for the tenant (care agency) */
-  tenantId: string;
-  /** Unique identifier for the caregiver */
-  caregiverId: string;
+export interface CaregiverAbsenceBookedEvent extends CaregiverEvent {
   /** Start time of the absence */
   startTime: Date;
   /** End time of the absence */
   endTime: Date;
+}
+
+export function isValidCaregiverEvent(event: unknown): event is CaregiverEvent {
+  return false;
 }
 
 export function isCaregiverPermanentUnavailabilityEvent(event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent): event is CaregiverPermanentUnavailabilityEvent {
