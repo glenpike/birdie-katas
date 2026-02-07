@@ -1,3 +1,5 @@
+import type { Visit } from "./repositories/visits";
+
 export interface CaregiverPermanentUnavailabilityEvent {
   /** Unique identifier for the permanent unavailability event */
   id: string;
@@ -20,4 +22,38 @@ export interface CaregiverAbsenceBookedEvent {
   startTime: Date;
   /** End time of the absence */
   endTime: Date;
+}
+
+export function isCaregiverPermanentUnavailabilityEvent(event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent): event is CaregiverPermanentUnavailabilityEvent {
+  return (event as CaregiverPermanentUnavailabilityEvent).effectiveFrom !== undefined
+}
+
+export interface CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date;
+  getFutureDate(event: unknown): Date;
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean;
+}
+
+export class CaregiverPermanentUnavailabilityHelpers implements CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date {
+    return (event as CaregiverPermanentUnavailabilityEvent).effectiveFrom
+  };
+  getFutureDate(event: unknown): Date {
+    return this.getEffectiveFrom(event).addYears(1);
+  };
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean {
+    return visit.startTime >= this.getEffectiveFrom(event);
+  };
+}
+
+export class CaregiverAbsenceBookedHelpers implements CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date {
+    return (event as CaregiverAbsenceBookedEvent).startTime
+  }
+  getFutureDate(event: unknown): Date {
+    return (event as CaregiverAbsenceBookedEvent).endTime
+  }
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean {
+    return visit.startTime >= this.getEffectiveFrom(event) && visit.endTime <= this.getFutureDate(event);
+  }
 }

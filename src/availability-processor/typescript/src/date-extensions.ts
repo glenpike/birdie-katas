@@ -25,3 +25,7 @@ Date.prototype.addDays = function (days: number): Date {
 Date.prototype.subtractDays = function (days: number): Date {
   return new Date(this.getTime() - days * 24 * HOUR_MS);
 };
+
+Date.prototype.addYears = function (years: number): Date {
+  return new Date(this.getTime() + years * 365 * 24 * HOUR_MS);
+};

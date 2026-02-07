@@ -7,6 +7,7 @@ declare global {
     subtractHours(hours: number): Date;
     addDays(days: number): Date;
     subtractDays(days: number): Date;
+    addYears(years: number): Date;
   }
 }
 
