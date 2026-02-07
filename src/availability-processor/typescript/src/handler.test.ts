@@ -63,7 +63,7 @@ describe("EventProcessor", () => {
       expect(allVisits[1].caregiverId).toBe("");
     });
 
-    it.todo(
+    it(
       "handles visits starting exactly at unavailability time",
       async () => {
         // When a visit starts exactly at the same time as the permanent unavailability,
