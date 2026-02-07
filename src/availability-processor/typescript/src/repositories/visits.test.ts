@@ -365,5 +365,11 @@ describe("VisitRepository", () => {
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe("2");
     });
+
+    it.todo("unassigns if the tenantId matches", async () => {
+    })
+
+    it.todo("doesn't unassign if the tenantId doesn't match", async () => {
+    })
   });
 });
