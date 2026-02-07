@@ -3,6 +3,7 @@ import type {
   CaregiverAbsenceBookedEvent,
 } from "./events";
 import {
+  isCaregiverEvent,
   isCaregiverPermanentUnavailabilityEvent,
   CaregiverEventHelpers,
   CaregiverPermanentUnavailabilityHelpers,
@@ -20,6 +21,8 @@ export class EventProcessor {
   async handleEvent(
     event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent
   ): Promise<void> {
+    isCaregiverEvent(event);
+
     const eventHelpers: CaregiverEventHelpers = isCaregiverPermanentUnavailabilityEvent(event)
       ? new CaregiverPermanentUnavailabilityHelpers()
       : new CaregiverAbsenceBookedHelpers();

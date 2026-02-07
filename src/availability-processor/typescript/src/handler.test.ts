@@ -383,5 +383,70 @@ describe("EventProcessor", () => {
         expect(allVisits[0].caregiverId).toBe("caregiver-1");
       });
     });
+
+    describe("invalid events", () => {
+      it("raises an error if our CaregiverPermanentUnavailabilityEvent is not valid ", async () => {
+
+        const visits: Visit[] = [
+          {
+            id: "visit-1",
+            tenantId: testTenantId,
+            patientId: "patient-1",
+            caregiverId: testCaregiverId,
+            startTime: new Date("2025-11-06T10:00:00.000Z"),
+            endTime: new Date("2025-11-06T11:00:00.000Z"),
+          },
+        ];
+
+        // Create repository and processor
+        const repo = new VisitRepository(visits);
+        const eventProcessor = new EventProcessor(repo);
+
+        // Create an invalid permanent unavailability event
+        const unavailabilityEvent: CaregiverPermanentUnavailabilityEvent = {
+          id: "unavailability-1",
+          tenantId: testTenantId,
+          caregiverId: testCaregiverId,
+          // @ts-ignore
+          effectiveFrom: null
+        };
+
+        expect(async () => {
+          await eventProcessor.handleEvent(unavailabilityEvent)
+        }).rejects.toThrowError()
+      });
+
+      it("raises an error if our CaregiverAbsenceBookedEvent is not valid ", async () => {
+
+        const visits: Visit[] = [
+          {
+            id: "visit-1",
+            tenantId: testTenantId,
+            patientId: "patient-1",
+            caregiverId: testCaregiverId,
+            startTime: new Date("2025-11-06T10:00:00.000Z"),
+            endTime: new Date("2025-11-06T11:00:00.000Z"),
+          },
+        ];
+
+        // Create repository and processor
+        const repo = new VisitRepository(visits);
+        const eventProcessor = new EventProcessor(repo);
+
+        // Create an invalid absence event
+        const absenceEvent: CaregiverAbsenceBookedEvent = {
+          id: "unavailability-1",
+          tenantId: testTenantId,
+          caregiverId: testCaregiverId,
+          // @ts-ignore
+          startTime: null,
+          endTime: new Date("2025-11-06T10:00:00.000Z"),
+        };
+
+        expect(async () => {
+          await eventProcessor.handleEvent(absenceEvent)
+        }).rejects.toThrowError()
+      });
+    });
   });
 });
