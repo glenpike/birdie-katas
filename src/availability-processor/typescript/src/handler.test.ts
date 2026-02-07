@@ -114,7 +114,10 @@ describe("EventProcessor", () => {
     describe("temporary absence", () => {
       it.todo("when absence is before visit");
       it.todo("when absence is after visit");
-      it.todo("when absence is during visit");
+      it.todo("when absence includes visit");
+      it.todo("when absence includes more than one visit");
+      it.todo("when absence starts during visit but ends after");
+      it.todo("when absence starts before visit but ends during");
     });
   });
 });
