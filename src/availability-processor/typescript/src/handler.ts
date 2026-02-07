@@ -5,7 +5,7 @@ import type { VisitRepository } from "./repositories/visits";
  * EventProcessor handles caregiver availability events
  */
 export class EventProcessor {
-  constructor(private readonly visitRepo: VisitRepository) {}
+  constructor(private readonly visitRepo: VisitRepository) { }
 
   async handleEvent(
     event: CaregiverPermanentUnavailabilityEvent
@@ -22,7 +22,7 @@ export class EventProcessor {
 
     // Unassign all visits that occur after the permanent unavailability starts
     for (const visit of visits) {
-      if (visit.startTime > event.effectiveFrom) {
+      if (visit.startTime >= event.effectiveFrom) {
         await this.visitRepo.unassign(visit.id, event.caregiverId);
       }
     }
