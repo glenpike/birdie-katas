@@ -27,8 +27,8 @@ export function isValidCaregiverEvent(event: unknown): event is CaregiverEvent {
     && typeof (event as CaregiverEvent)?.tenantId === 'string'
 }
 
-export function isCaregiverPermanentUnavailabilityEvent(event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent): event is CaregiverPermanentUnavailabilityEvent {
-  return (event as CaregiverPermanentUnavailabilityEvent).effectiveFrom !== undefined
+export function isCaregiverPermanentUnavailabilityEvent(event: unknown): event is CaregiverPermanentUnavailabilityEvent {
+  return isValidCaregiverEvent(event) && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom !== undefined && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom?.toISOString !== undefined
 }
 
 export interface CaregiverEventHelpers {

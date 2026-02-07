@@ -1,4 +1,4 @@
-import { isValidCaregiverEvent } from "./events";
+import { isValidCaregiverEvent, isCaregiverPermanentUnavailabilityEvent } from "./events";
 
 describe("isValidCaregiverEvent", () => {
   it("returns true if our event has correct attributes", () => {
@@ -60,3 +60,41 @@ describe("isValidCaregiverEvent", () => {
     })).toBe(false);
   });
 });
+
+describe("isCaregiverPermanentUnavailabilityEvent", () => {
+  it("returns true if our event has the correct attributes", () => {
+    expect(isCaregiverPermanentUnavailabilityEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      effectiveFrom: new Date(),
+    })).toBe(true);
+  });
+
+  it("checks types correctly", () => {
+    expect(isCaregiverPermanentUnavailabilityEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      effectiveFrom: 'test',
+    })).toBe(false);
+  });
+
+  it("effectiveFrom can't be null", () => {
+    expect(isCaregiverPermanentUnavailabilityEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      effectiveFrom: null,
+    })).toBe(false);
+  });
+
+  it("checks parent event types correctly", () => {
+    expect(isCaregiverPermanentUnavailabilityEvent({
+      id: 1,
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      effectiveFrom: new Date(),
+    })).toBe(false);
+  })
+})
