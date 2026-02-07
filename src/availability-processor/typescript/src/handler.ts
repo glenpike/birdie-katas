@@ -28,10 +28,15 @@ export class EventProcessor {
       effectiveFrom,
       futureDate
     );
-    // Unassign all visits that occur after the unavailability starts and ends
+
+    // Unassign all visits that match our events
     for (const visit of visits) {
-      if (visit.startTime >= effectiveFrom && visit.endTime <= futureDate) {
-        await this.visitRepo.unassign(visit.id, event.caregiverId);
+      if (visit.startTime >= effectiveFrom) {
+        if (isCaregiverPermanentUnavailabilityEvent(event)) {
+          await this.visitRepo.unassign(visit.id, event.caregiverId);
+        } else if (visit.endTime <= event.endTime) {
+          await this.visitRepo.unassign(visit.id, event.caregiverId);
+        }
       }
     }
   }
