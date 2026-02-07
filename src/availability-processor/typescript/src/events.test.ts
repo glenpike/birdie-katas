@@ -1,34 +1,34 @@
-import { isValidCaregiverEvent, isCaregiverPermanentUnavailabilityEvent } from "./events";
+import { validateBaseCaregiverEvent, isCaregiverEvent, isCaregiverPermanentUnavailabilityEvent, isCaregiverAbsenceBookedEvent } from "./events";
 
-describe("isValidCaregiverEvent", () => {
+describe("validateBaseCaregiverEvent", () => {
   it("returns true if our event has correct attributes", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       tenantId: "tenant-1",
       caregiverId: "caregiver-1",
     })).toBe(true);
   })
   it("returns false if our event is missing the caregiverId", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       tenantId: "tenant-1",
     })).toBe(false);
   })
   it("returns false if our event is missing the id", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       tenantId: "tenant-1",
       caregiverId: "caregiver-1",
     })).toBe(false);
   })
   it("returns false if our event is missing the tenantId", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       caregiverId: "caregiver-1",
     })).toBe(false);
   });
 
   it("ignores extra attributes", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       tenantId: "tenant-1",
       caregiverId: "caregiver-1",
@@ -37,7 +37,7 @@ describe("isValidCaregiverEvent", () => {
   });
 
   it("checks the type of id correctly", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: 1,
       tenantId: "tenant-1",
       caregiverId: "caregiver-1",
@@ -45,7 +45,7 @@ describe("isValidCaregiverEvent", () => {
   });
 
   it("checks the type of tenantId correctly", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       tenantId: 123,
       caregiverId: "caregiver-1",
@@ -53,7 +53,7 @@ describe("isValidCaregiverEvent", () => {
   });
 
   it("checks the type of caregiverId correctly", () => {
-    expect(isValidCaregiverEvent({
+    expect(validateBaseCaregiverEvent({
       id: "1",
       tenantId: "tenant-1",
       caregiverId: null,
@@ -96,5 +96,95 @@ describe("isCaregiverPermanentUnavailabilityEvent", () => {
       caregiverId: "caregiver-1",
       effectiveFrom: new Date(),
     })).toBe(false);
+  });
+});
+
+describe("isCaregiverAbsenceBookedEvent", () => {
+  it("returns true if our event has the correct attributes", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: new Date(),
+      endTime: new Date(),
+    })).toBe(true);
+  });
+
+  it("checks startTime type correctly", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: 'test',
+      endTime: new Date(),
+    })).toBe(false);
+  });
+
+  it("checks endTime type correctly", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: new Date(),
+      endTime: 'test',
+    })).toBe(false);
+  });
+
+  it("startTime can't be null", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: null,
+      endTime: new Date(),
+    })).toBe(false);
+  });
+
+  it("endTime can't be null", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: new Date(),
+      endTime: null,
+    })).toBe(false);
+  });
+
+  it("checks parent event types correctly", () => {
+    expect(isCaregiverAbsenceBookedEvent({
+      id: "1",
+      tenantId: 123,
+      caregiverId: "caregiver-1",
+      startTime: new Date(),
+      endTime: new Date(),
+    })).toBe(false);
+  });
+});
+
+describe("isCaregiverEvent", () => {
+  it("returns true for a CaregiverPermanentUnavailabilityEvent", () => {
+    expect(isCaregiverEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      effectiveFrom: new Date(),
+    })).toBe(true);
+  });
+  it("returns true for a CaregiverAbsenceBookedEvent", () => {
+    expect(isCaregiverEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+      startTime: new Date(),
+      endTime: new Date(),
+    })).toBe(true);
+  });
+
+  it("throws an error for invalid event", () => {
+    expect(() => isCaregiverEvent({
+      id: "1",
+      tenantId: "tenant-1",
+      caregiverId: "caregiver-1",
+    })).toThrow("Event is not a CaregiverPermanentUnavailabilityEvent or CaregiverAbsenceBookedEvent")
   })
-})
+});

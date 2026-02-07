@@ -21,14 +21,31 @@ export interface CaregiverAbsenceBookedEvent extends CaregiverEvent {
   endTime: Date;
 }
 
-export function isValidCaregiverEvent(event: unknown): event is CaregiverEvent {
+export function validateBaseCaregiverEvent(event: unknown): event is CaregiverEvent {
   return typeof (event as CaregiverEvent)?.id === 'string'
     && typeof (event as CaregiverEvent)?.caregiverId === 'string'
     && typeof (event as CaregiverEvent)?.tenantId === 'string'
 }
 
 export function isCaregiverPermanentUnavailabilityEvent(event: unknown): event is CaregiverPermanentUnavailabilityEvent {
-  return isValidCaregiverEvent(event) && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom !== undefined && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom?.toISOString !== undefined
+  return validateBaseCaregiverEvent(event)
+    && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom !== undefined
+    && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom?.toISOString !== undefined
+}
+
+export function isCaregiverAbsenceBookedEvent(event: unknown): event is CaregiverAbsenceBookedEvent {
+  return validateBaseCaregiverEvent(event)
+    && (event as CaregiverAbsenceBookedEvent)?.startTime !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.startTime?.toISOString !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.endTime !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.endTime?.toISOString !== undefined
+}
+
+export function isCaregiverEvent(event: unknown): event is CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent | never {
+  if (isCaregiverPermanentUnavailabilityEvent(event) || isCaregiverAbsenceBookedEvent(event)) {
+    return true
+  }
+  throw new Error("Event is not a CaregiverPermanentUnavailabilityEvent or CaregiverAbsenceBookedEvent")
 }
 
 export interface CaregiverEventHelpers {
