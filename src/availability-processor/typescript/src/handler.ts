@@ -1,6 +1,9 @@
-import type { CaregiverPermanentUnavailabilityEvent } from "./events";
+import type { CaregiverPermanentUnavailabilityEvent, CaregiverAbsenceBookedEvent } from "./events";
 import type { VisitRepository } from "./repositories/visits";
 
+function isCaregiverPermanentUnavailabilityEvent(event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent): event is CaregiverPermanentUnavailabilityEvent {
+  return (event as CaregiverPermanentUnavailabilityEvent).effectiveFrom !== undefined
+}
 /**
  * EventProcessor handles caregiver availability events
  */
@@ -8,8 +11,12 @@ export class EventProcessor {
   constructor(private readonly visitRepo: VisitRepository) { }
 
   async handleEvent(
-    event: CaregiverPermanentUnavailabilityEvent
+    event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent
   ): Promise<void> {
+    if (!isCaregiverPermanentUnavailabilityEvent(event)) {
+      return;
+    }
+
     const futureDate = new Date(
       event.effectiveFrom.getTime() + 365 * 24 * 60 * 60 * 1000
     ); // 1 year in the future
