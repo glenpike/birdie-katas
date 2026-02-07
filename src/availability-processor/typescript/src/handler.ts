@@ -15,9 +15,13 @@ export class EventProcessor {
   ): Promise<void> {
     const effectiveFrom = isCaregiverPermanentUnavailabilityEvent(event) ? event.effectiveFrom : event.startTime;
 
-    const futureDate = new Date(
-      effectiveFrom.getTime() + 365 * 24 * 60 * 60 * 1000
-    ); // 1 year in the future
+    // If it's a permanent unavailability, we get the visits for the next year
+    // If it's a temporary absence, we get the visits until it's end time
+    const futureDate = isCaregiverPermanentUnavailabilityEvent(event)
+      ? new Date(
+        effectiveFrom.getTime() + 365 * 24 * 60 * 60 * 1000
+      )
+      : event.endTime;
 
     const visits = await this.visitRepo.getCalendar(
       event.caregiverId,
@@ -25,7 +29,7 @@ export class EventProcessor {
       futureDate
     );
 
-    // Unassign all visits that occur after the permanent unavailability starts
+    // Unassign all visits that occur after the unavailability starts and ends
     for (const visit of visits) {
       if (visit.startTime >= effectiveFrom) {
         await this.visitRepo.unassign(visit.id, event.caregiverId);
