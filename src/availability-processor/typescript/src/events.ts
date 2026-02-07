@@ -22,7 +22,7 @@ export interface CaregiverAbsenceBookedEvent extends CaregiverEvent {
 }
 
 export function isValidCaregiverEvent(event: unknown): event is CaregiverEvent {
-  return true;
+  return (event as CaregiverEvent).caregiverId !== undefined
 }
 
 export function isCaregiverPermanentUnavailabilityEvent(event: CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent): event is CaregiverPermanentUnavailabilityEvent {
