@@ -1,23 +1,79 @@
-export interface CaregiverPermanentUnavailabilityEvent {
+import type { Visit } from "./repositories/visits";
+
+export interface CaregiverEvent {
   /** Unique identifier for the permanent unavailability event */
   id: string;
   /** Unique identifier for the tenant (care agency) */
   tenantId: string;
   /** Unique identifier for the caregiver */
   caregiverId: string;
+}
+
+export interface CaregiverPermanentUnavailabilityEvent extends CaregiverEvent {
   /** Time when the permanent unavailability starts */
   effectiveFrom: Date;
 }
 
-export interface CaregiverAbsenceBookedEvent {
-  /** Unique identifier for the absence event */
-  id: string;
-  /** Unique identifier for the tenant (care agency) */
-  tenantId: string;
-  /** Unique identifier for the caregiver */
-  caregiverId: string;
+export interface CaregiverAbsenceBookedEvent extends CaregiverEvent {
   /** Start time of the absence */
   startTime: Date;
   /** End time of the absence */
   endTime: Date;
+}
+
+export function validateBaseCaregiverEvent(event: unknown): event is CaregiverEvent {
+  return typeof (event as CaregiverEvent)?.id === 'string'
+    && typeof (event as CaregiverEvent)?.caregiverId === 'string'
+    && typeof (event as CaregiverEvent)?.tenantId === 'string'
+}
+
+export function isCaregiverPermanentUnavailabilityEvent(event: unknown): event is CaregiverPermanentUnavailabilityEvent {
+  return validateBaseCaregiverEvent(event)
+    && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom !== undefined
+    && (event as CaregiverPermanentUnavailabilityEvent)?.effectiveFrom?.toISOString !== undefined
+}
+
+export function isCaregiverAbsenceBookedEvent(event: unknown): event is CaregiverAbsenceBookedEvent {
+  return validateBaseCaregiverEvent(event)
+    && (event as CaregiverAbsenceBookedEvent)?.startTime !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.startTime?.toISOString !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.endTime !== undefined
+    && (event as CaregiverAbsenceBookedEvent)?.endTime?.toISOString !== undefined
+}
+
+export function isCaregiverEvent(event: unknown): event is CaregiverPermanentUnavailabilityEvent | CaregiverAbsenceBookedEvent | never {
+  if (isCaregiverPermanentUnavailabilityEvent(event) || isCaregiverAbsenceBookedEvent(event)) {
+    return true
+  }
+  throw new Error("Event is not a CaregiverPermanentUnavailabilityEvent or CaregiverAbsenceBookedEvent")
+}
+
+export interface CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date;
+  getFutureDate(event: unknown): Date;
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean;
+}
+
+export class CaregiverPermanentUnavailabilityHelpers implements CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date {
+    return (event as CaregiverPermanentUnavailabilityEvent).effectiveFrom
+  };
+  getFutureDate(event: unknown): Date {
+    return this.getEffectiveFrom(event).addYears(1);
+  };
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean {
+    return visit.startTime >= this.getEffectiveFrom(event);
+  };
+}
+
+export class CaregiverAbsenceBookedHelpers implements CaregiverEventHelpers {
+  getEffectiveFrom(event: unknown): Date {
+    return (event as CaregiverAbsenceBookedEvent).startTime
+  }
+  getFutureDate(event: unknown): Date {
+    return (event as CaregiverAbsenceBookedEvent).endTime
+  }
+  shouldUnassignVisits(visit: Visit, event: unknown): boolean {
+    return visit.startTime >= this.getEffectiveFrom(event) && visit.endTime <= this.getFutureDate(event);
+  }
 }

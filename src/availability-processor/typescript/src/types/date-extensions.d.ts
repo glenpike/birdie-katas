@@ -5,7 +5,10 @@ declare global {
     addHours(hours: number): Date;
     subtractMinutes(minutes: number): Date;
     subtractHours(hours: number): Date;
+    addDays(days: number): Date;
+    subtractDays(days: number): Date;
+    addYears(years: number): Date;
   }
 }
 
-export {};
+export { };
